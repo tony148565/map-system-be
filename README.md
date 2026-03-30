@@ -1,0 +1,1 @@
+This backend is a minimal mock API used for frontend interaction testing.
