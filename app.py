@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-
+import re
 app = Flask(__name__)
 CORS(app)
 
@@ -41,13 +41,31 @@ def add_event():
     data = request.get_json()
 
     required_fields = ["uid", "type", "lat", "lon", "status", "label"]
-    missing_fields = [field for field in required_fields if field not in data]
 
+    missing_fields = [
+        field for field in required_fields
+        if field not in data or data[field] in (None, "", [])
+    ]
+    
+    if not re.match(r"^[a-zA-Z0-9-_]+$", data["uid"]):
+        return jsonify({
+            "error": "UID format invalid"
+        }), 400
+    
     if missing_fields:
         return jsonify({
             "error": "Missing required fields",
             "missing_fields": missing_fields
         }), 400
+    
+    if not data["uid"].strip():
+        return jsonify({
+            "error": "UID cannot be empty"
+        }), 400
+    
+    
+    
+    
 
     existing = find_event_by_uid(data["uid"])
     if existing:
